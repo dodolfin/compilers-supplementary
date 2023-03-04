@@ -39,9 +39,4 @@ var stmts = memo $ eta syntax (stmt | s1=stmt s[";"] s2=stmts {Seq (s1, s2)});
    
 
 -- Public top-level parser
-<<<<<<< HEAD
-public parse = stmt;
-=======
 public parse = stmts;
-
->>>>>>> c9a8039... Complete Task 3
