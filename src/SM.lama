@@ -123,16 +123,17 @@ fun genLabels (env, n) {
 }
 
 -- Compiles an expression into a stack machine code.
--- Takes an expression, returns a list of stack machine instructions
+-- Takes an expression, returns a buffer of stack machine instructions.
 fun compileExpr (expr) {
   case expr of 
-    Var (s) -> { LD (s) }
-  | Const (n) -> { CONST (n) }
-  | Binop (op, e1, e2) -> compileExpr (e1) +++ compileExpr (e2) +++ { BINOP (op) }
+    Var (s) -> singletonBuffer (LD (s))
+  | Const (n) -> singletonBuffer (CONST (n))
+  | Binop (op, e1, e2) -> compileExpr (e1) <+> compileExpr (e2) <+ BINOP (op)
   esac
 }
 
 -- Compiles a statement into a stack machine code.
+<<<<<<< HEAD
 -- Takes a statement, returns a list of stack machine
 -- instructions.
 public fun compileSM (stmt) {
@@ -188,5 +189,22 @@ public fun compileSM (stmt) {
   | Read (s) -> { READ, ST (s) }
   | Write (e) -> compileExpr (e) +++ { WRITE }
 >>>>>>> 2067112... Implement Statements -> Stack Machine compiler and Stack Machine semantics
+=======
+-- Takes a statement, returns a buffer of stack machine instructions.
+public fun compileSMToBuffer (stmt) {
+  case stmt of 
+    Assn (s, e) -> compileExpr (e) <+ ST (s)
+  | Seq (s1, s2) -> compileSMToBuffer (s1) <+> compileSMToBuffer (s2)
+  | Skip -> emptyBuffer ()
+  | Read (s) -> singletonBuffer (READ) <+ ST (s)
+  | Write (e) -> compileExpr (e) <+ WRITE
+>>>>>>> 830c084... Use buffers instead of lists for compilation to SM
   esac
+}
+
+-- Compiles a statement into a stack machine code.
+-- Takes a statement, returns a list of stack machine
+-- instructions.
+public fun compileSM (stmt) {
+  getBuffer $ compileSMToBuffer (stmt)
 }
